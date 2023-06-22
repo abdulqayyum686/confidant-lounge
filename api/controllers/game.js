@@ -413,10 +413,12 @@ module.exports.pinArticle = async (req, res) => {
 }
 //Get all pinned review and article
 
-module.exports.AllPinnedData = async (req, res) => {
+module.exports.getPinnedDataByUser = async (req, res) => {
   try {
-    // Find all pinned documents
-    const pinnedItems = await Pinned.find();
+    const { userId } = req.body;
+
+    // Find all pinned documents for the specified user ID
+    const pinnedItems = await Pinned.find({ pinnedBy: userId });
 
     // Extract the article IDs and review IDs from the pinned documents
     const articleIds = pinnedItems.map(item => item.article);
@@ -435,7 +437,7 @@ module.exports.AllPinnedData = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve pinned items" });
   }
-}
+};
 
 
 // Define a route for pinning a review
