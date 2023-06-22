@@ -24,7 +24,7 @@ function userRouter(io) {
 
   router.post(
     "/add-user-article",
-    upload.single("file"),
+    upload.single("pdf"),
     userController.addUserArticle
   );
   router.get("/get-user-article", userController.getAllUserArticle);

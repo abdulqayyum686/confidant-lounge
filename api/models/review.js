@@ -11,6 +11,9 @@ const gameReviewSchema = mongoose.Schema({
   gameScore: {
     type: String,
   },
+  reviewFile: {
+    type: String,
+  },
   reviewType: {
     type: String,
   },
@@ -18,6 +21,10 @@ const gameReviewSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Users",
   },
+  pinnedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+  }],
 });
 
 module.exports = mongoose.model("GameReview", gameReviewSchema);

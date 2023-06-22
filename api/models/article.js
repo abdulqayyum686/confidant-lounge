@@ -17,6 +17,10 @@ const articleSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Users",
   },
+  pinnedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+  }],
 });
 
 module.exports = mongoose.model("Articles", articleSchema);

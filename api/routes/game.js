@@ -35,10 +35,22 @@ function gameRouter(io) {
     gameController.getUserRecomendedContentById
   );
 
-  router.post("/add-game-review", gameController.addGameReview);
+  router.post(
+    "/add-game-review",
+    upload.single("reviewFile"),
+    gameController.addGameReview
+  );
+
+  router.post("/add-game-new-review", gameController.newreviewtype);
+  router.post("/add-game-new-platform", gameController.newplateform);
+
   router.post("/add-game", gameController.addGame);
+
   router.get("/get-games/:id", gameController.getGamesById);
   router.get("/get-all-games", gameController.getAllGames);
+  router.get("/get-all-new-review", gameController.getAllnewReviews);
+  router.get("/get-all-new-platform", gameController.getAllnewplatform);
+
   return router;
 }
 

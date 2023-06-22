@@ -55,6 +55,9 @@ module.exports.userLogin = (req, res, next) => {
       });
     });
 };
+
+
+
 module.exports.userSignup = (req, res, next) => {
   console.log("==>>>responce sigup>>", req.body);
   const { email, password } = req.body;
@@ -162,7 +165,7 @@ exports.getAllUsers = async (req, res) => {
 // articles controllers
 module.exports.addUserArticle = async (req, res) => {
   console.log("addUserArticle", req.body);
-  const { title, description, belongsTo, link } = req.body;
+  const {  belongsTo, link } = req.body;
   try {
     let image = null;
 
@@ -170,11 +173,9 @@ module.exports.addUserArticle = async (req, res) => {
       image = `/img/${req.file.filename}`;
     }
     const add_article = new articleSchema({
-      title,
-      description,
       belongsTo,
       link,
-      file: image,
+       file: image,
     });
     const response = await add_article.save();
     if (response) {

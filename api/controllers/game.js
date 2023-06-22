@@ -2,23 +2,25 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const gameSchema = require("../models/game");
 const reviewSchema = require("../models/review");
+const newreviewtype = require("../models/NewReviewType");
+const newplateform = require("../models/Platform");
+
+
 const playingSchema = require("../models/playing");
 const contextSchema = require("../models/context");
 const recomendedContentSchema = require("../models/recomendedContent");
 var ObjectId = require("mongodb").ObjectID;
+
 //games controllers
 module.exports.addGame = async (req, res) => {
   console.log("addGame", req.body);
-  const { title, name, platform, releaseYear, contentType, belongsTo } =
-    req.body;
+  const { name, platform, releaseYear, belongsTo } = req.body;
 
   try {
     const add_game = new gameSchema({
-      title,
       name,
       platform,
       releaseYear,
-      contentType,
       belongsTo,
     });
     const response = await add_game.save();
@@ -37,13 +39,20 @@ module.exports.addGameReview = async (req, res) => {
   console.log("addGameReview", req.body);
   const { link, gameId, gameScore, reviewType, belongsTo } = req.body;
 
+  let reviewFile = null;
+
+  if (req.file.filename != undefined) {
+    reviewFile = `/file/${req.file.filename}`;
+  }
+
   try {
     const add_game_review = new reviewSchema({
-      link,
-      gameId,
-      gameScore,
-      reviewType,
-      belongsTo,
+      link:link,
+      gameId:gameId,
+      gameScore:gameScore,
+      reviewType:reviewType,
+      reviewFile:reviewFile,
+      belongsTo:belongsTo
     });
     const response = await add_game_review.save();
     if (response) {
@@ -69,6 +78,68 @@ module.exports.addGameReview = async (req, res) => {
     res.status(500).json({ error: error });
   }
 };
+
+module.exports.newreviewtype = async (req, res) => {
+  console.log("addGameReview", req.body);
+  const { newReviewType,  belongsTo } = req.body;
+
+ 
+  try {
+    const add_game_review = new newreviewtype({
+      newReviewType,  belongsTo 
+    });
+    const response = await add_game_review.save();
+    res
+    .status(200)
+    .json({ message: "game new  review add successfully",response });
+     
+  } catch (error) {
+    console.log("game review  api error", error);
+    res.status(500).json({ error: error });
+  }
+};
+
+
+module.exports.newplateform = async (req, res) => {
+  console.log("addGameReview", req.body);
+  const { newPlatform,  belongsTo } = req.body.newPlatform;
+
+ 
+  try {
+    const add_game_review = new newplateform({
+      newPlatform,  belongsTo 
+    });
+    const response = await add_game_review.save();
+    res
+    .status(200)
+    .json({ message: "game new  review add successfully",response });
+     
+  } catch (error) {
+    console.log("game review  api error", error);
+    res.status(500).json({ error: error });
+  }
+};
+module.exports.getAllnewReviews = async (req, res) => {
+  try {
+    const reviews = await newreviewtype.find();
+    res.status(200).json({ reviews });
+  } catch (error) {
+    console.log("Error fetching reviews", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+};
+
+module.exports.getAllnewplatform = async (req, res) => {
+  try {
+    const reviews = await newplateform.find();
+    res.status(200).json({ reviews });
+  } catch (error) {
+    console.log("Error fetching reviews", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+};
+
+
 exports.getGamesById = async (req, res) => {
   try {
     let data = await gameSchema
@@ -122,7 +193,7 @@ exports.getAllGames = async (req, res) => {
 //article controllers
 module.exports.addPlaying = async (req, res) => {
   console.log("addPlaying", req.body);
-  const { title, belongsTo } = req.body;
+  const { title, belongsTo,link } = req.body;
   let image = null;
 
   if (req.file.filename != undefined) {
@@ -134,6 +205,7 @@ module.exports.addPlaying = async (req, res) => {
       title,
       image,
       belongsTo,
+      link
     });
     const response = await add_playing.save();
     if (response) {
@@ -149,7 +221,7 @@ module.exports.addPlaying = async (req, res) => {
 };
 module.exports.addContext = async (req, res) => {
   console.log("addContext", req.body);
-  const { title, belongsTo } = req.body;
+  const { title, belongsTo, link } = req.body;
   let image = null;
 
   if (req.file.filename != undefined) {
@@ -161,6 +233,7 @@ module.exports.addContext = async (req, res) => {
       title,
       image,
       belongsTo,
+      link:req.body.link
     });
     const response = await add_context.save();
     if (response) {
