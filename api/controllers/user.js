@@ -223,3 +223,49 @@ exports.getUserArticleById = async (req, res) => {
     res.status(500).json({ error: err });
   }
 };
+
+
+//pin article 
+
+
+exports.pindUserArticle =  async (req, res) => {
+  try {
+    const { articleId, userId } = req.body;
+
+    // Find the article by its ID
+    const article = await articleSchema.findById(articleId);
+
+    // Add the user ID to the pinnedBy array
+    article.pinnedBy.push(userId);
+
+    // Save the updated article
+    const updatedArticle = await article.save();
+
+    res.status(200).json(updatedArticle);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add user to the pinnedBy array" });
+  }
+}
+
+
+//pin Review 
+
+
+exports.pindUserReview =  async (req, res) => {
+  try {
+    const { reviewId, userId } = req.body;
+
+    // Find the article by its ID
+    const article = await articleSchema.findById(reviewId);
+
+    // Add the user ID to the pinnedBy array
+    article.pinnedBy.push(userId);
+
+    // Save the updated article
+    const updatedArticle = await article.save();
+
+    res.status(200).json(updatedArticle);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add user to the pinnedBy array" });
+  }
+}
