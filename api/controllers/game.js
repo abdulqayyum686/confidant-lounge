@@ -4,6 +4,8 @@ const gameSchema = require("../models/game");
 const reviewSchema = require("../models/review");
 const newreviewtype = require("../models/NewReviewType");
 const newplateform = require("../models/Platform");
+const Article = require("../models/article");
+
 
 
 const playingSchema = require("../models/playing");
@@ -409,6 +411,32 @@ module.exports.pinArticle = async (req, res) => {
     res.status(500).json({ error: "Failed to pin the article" });
   }
 }
+//Get all pinned review and article
+
+module.exports.AllPinnedData = async (req, res) => {
+  try {
+    // Find all pinned documents
+    const pinnedItems = await Pinned.find();
+
+    // Extract the article IDs and review IDs from the pinned documents
+    const articleIds = pinnedItems.map(item => item.article);
+    const reviewIds = pinnedItems.map(item => item.review);
+
+    // Find all articles and reviews that match the extracted IDs
+    const pinnedArticles = await Article.find({ _id: { $in: articleIds } });
+    const pinnedReviews = await reviewSchema.find({ _id: { $in: reviewIds } });
+
+    const pinnedData = {
+      articles: pinnedArticles,
+      reviews: pinnedReviews
+    };
+
+    res.status(200).json(pinnedData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to retrieve pinned items" });
+  }
+}
+
 
 // Define a route for pinning a review
 module.exports.pinReview = async (req, res) => {

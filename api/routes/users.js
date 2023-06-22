@@ -27,6 +27,15 @@ function userRouter(io) {
     upload.single("pdf"),
     userController.addUserArticle
   );
+  router.post(
+    "/add-user-pindded-article",
+userController.pindUserArticle
+  );
+
+  router.post(
+    "/add-user-pindded-review",
+userController.pindUserReview
+  );
   router.get("/get-user-article", userController.getAllUserArticle);
   router.get("/get-user-article-byid/:id", userController.getUserArticleById);
 
