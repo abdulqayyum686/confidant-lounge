@@ -41,8 +41,15 @@ function gameRouter(io) {
     gameController.addGameReview
   );
 
+  router.get("/get-Allgames-review", gameController.getAllReviewsData
+  );
+
   router.post("/add-game-new-review", gameController.newreviewtype);
   router.post("/add-game-new-platform", gameController.newplateform);
+
+  router.post("/pin-review", gameController.pinReview);
+  router.post("/pin-article", gameController.pinArticle);
+
 
   router.post("/add-game", gameController.addGame);
 
