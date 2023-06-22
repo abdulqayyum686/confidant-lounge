@@ -44,7 +44,7 @@ module.exports.addGameReview = async (req, res) => {
   let reviewFile = null;
 
   if (req.file.filename != undefined) {
-    reviewFile = `/file/${req.file.filename}`;
+    reviewFile = `/img/${req.file.filename}`;
   }
 
   try {
