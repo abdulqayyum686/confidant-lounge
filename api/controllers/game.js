@@ -7,6 +7,8 @@ const newplateform = require("../models/Platform");
 
 
 const playingSchema = require("../models/playing");
+const Pinned = require("../models/pinned");
+
 const contextSchema = require("../models/context");
 const recomendedContentSchema = require("../models/recomendedContent");
 var ObjectId = require("mongodb").ObjectID;
@@ -76,6 +78,16 @@ module.exports.addGameReview = async (req, res) => {
   } catch (error) {
     console.log("game review  api error", error);
     res.status(500).json({ error: error });
+  }
+};
+
+module.exports.getAllReviewsData = async (req, res) => {
+  try {
+    const reviews = await reviewSchema.find();
+    res.status(200).json({ reviews });
+  } catch (error) {
+    console.log("Error fetching reviews", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
   }
 };
 
@@ -374,3 +386,47 @@ exports.deletProduct = async (req, res) => {
     console.log("error", err);
   }
 };
+
+
+///pin by ID
+module.exports.pinArticle = async (req, res) => {
+
+  console.log("req.body",req.body)
+  try {
+    const { articleId, pinnedById } = req.body;
+
+    // Create a new pinned document for the article
+    const pinnedArticle = new Pinned({
+      article: articleId,
+      pinnedBy: pinnedById
+    });
+
+    // Save the pinned article
+    const savedPinnedArticle = await pinnedArticle.save();
+
+    res.status(200).json(savedPinnedArticle);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to pin the article" });
+  }
+}
+
+// Define a route for pinning a review
+module.exports.pinReview = async (req, res) => {
+  try {
+    const { reviewId, pinnedById } = req.body;
+
+    // Create a new pinned document for the review
+    const pinnedReview = new Pinned({
+      review: reviewId,
+      pinnedBy: pinnedById
+    });
+
+    // Save the pinned review
+    const savedPinnedReview = await pinnedReview.save();
+
+    res.status(200).json(savedPinnedReview);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to pin the review" });
+  }
+}
+
