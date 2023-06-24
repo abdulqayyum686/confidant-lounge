@@ -41,22 +41,20 @@ function gameRouter(io) {
     gameController.addGameReview
   );
 
-  router.get("/get-Allgames-review", gameController.getAllReviewsData
-  );
-  
-  router.get("/allPinned", gameController.AllPinnedData
-  );
+  router.get("/get-Allgames-review", gameController.getAllReviewsData);
 
-
-  
+  router.get("/allPinned/", gameController.getPinnedDataByUser);
 
   router.post("/add-game-new-review", gameController.newreviewtype);
   router.post("/add-game-new-platform", gameController.newplateform);
 
   router.post("/pin-review", gameController.pinReview);
   router.post("/pin-article", gameController.pinArticle);
+<<<<<<< HEAD
   router.put("/pin-review-remove", gameController.RemovePinReview);
   router.put("/pin-article-remove", gameController.RemovePinArticle);
+=======
+>>>>>>> 7eb5277f0a2f8d6069529aff25cc2e40113b8644
 
   router.post("/add-game", gameController.addGame);
 
