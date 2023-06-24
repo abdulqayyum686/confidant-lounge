@@ -460,10 +460,6 @@ module.exports.getPinnedDataByUser = async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve pinned items" });
   }
 };
-<<<<<<< HEAD
-=======
-
->>>>>>> 7eb5277f0a2f8d6069529aff25cc2e40113b8644
 
 // Define a route for pinning a review
 module.exports.pinReview = async (req, res) => {
