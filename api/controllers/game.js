@@ -5,8 +5,7 @@ const reviewSchema = require("../models/review");
 const newreviewtype = require("../models/NewReviewType");
 const newplateform = require("../models/Platform");
 const Article = require("../models/article");
-
-
+const articleSchema = require("../models/article");
 
 const playingSchema = require("../models/playing");
 const Pinned = require("../models/pinned");
@@ -51,15 +50,17 @@ module.exports.addGameReview = async (req, res) => {
 
   try {
     const add_game_review = new reviewSchema({
-      link:link,
-      gameId:gameId,
-      gameScore:gameScore,
-      reviewType:reviewType,
-      reviewFile:reviewFile,
-      belongsTo:belongsTo
+      link: link,
+      gameId: gameId,
+      gameScore: gameScore,
+      reviewType: reviewType,
+      reviewFile: reviewFile,
+      belongsTo: belongsTo,
     });
+
     const response = await add_game_review.save();
     if (response) {
+      await response.populate("belongsTo").execPopulate();
       let updated_game = await gameSchema.findOneAndUpdate(
         { _id: gameId },
         { $push: { reviewIds: response._id } },
@@ -85,7 +86,7 @@ module.exports.addGameReview = async (req, res) => {
 
 module.exports.getAllReviewsData = async (req, res) => {
   try {
-    const reviews = await reviewSchema.find();
+    const reviews = await reviewSchema.find().populate("belongsTo");
     res.status(200).json({ reviews });
   } catch (error) {
     console.log("Error fetching reviews", error);
@@ -95,39 +96,36 @@ module.exports.getAllReviewsData = async (req, res) => {
 
 module.exports.newreviewtype = async (req, res) => {
   console.log("addGameReview", req.body);
-  const { newReviewType,  belongsTo } = req.body;
+  const { newReviewType, belongsTo } = req.body;
 
- 
   try {
     const add_game_review = new newreviewtype({
-      newReviewType,  belongsTo 
+      newReviewType,
+      belongsTo,
     });
     const response = await add_game_review.save();
     res
-    .status(200)
-    .json({ message: "game new  review add successfully",response });
-     
+      .status(200)
+      .json({ message: "game new  review add successfully", response });
   } catch (error) {
     console.log("game review  api error", error);
     res.status(500).json({ error: error });
   }
 };
 
-
 module.exports.newplateform = async (req, res) => {
   console.log("addGameReview", req.body);
-  const { newPlatform,  belongsTo } = req.body.newPlatform;
+  const { newPlatform, belongsTo } = req.body.newPlatform;
 
- 
   try {
     const add_game_review = new newplateform({
-      newPlatform,  belongsTo 
+      newPlatform,
+      belongsTo,
     });
     const response = await add_game_review.save();
     res
-    .status(200)
-    .json({ message: "game new  review add successfully",response });
-     
+      .status(200)
+      .json({ message: "game new  review add successfully", response });
   } catch (error) {
     console.log("game review  api error", error);
     res.status(500).json({ error: error });
@@ -152,7 +150,6 @@ module.exports.getAllnewplatform = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 };
-
 
 exports.getGamesById = async (req, res) => {
   try {
@@ -207,7 +204,7 @@ exports.getAllGames = async (req, res) => {
 //article controllers
 module.exports.addPlaying = async (req, res) => {
   console.log("addPlaying", req.body);
-  const { title, belongsTo,link } = req.body;
+  const { title, belongsTo, link } = req.body;
   let image = null;
 
   if (req.file.filename != undefined) {
@@ -219,7 +216,7 @@ module.exports.addPlaying = async (req, res) => {
       title,
       image,
       belongsTo,
-      link
+      link,
     });
     const response = await add_playing.save();
     if (response) {
@@ -247,7 +244,7 @@ module.exports.addContext = async (req, res) => {
       title,
       image,
       belongsTo,
-      link:req.body.link
+      link: req.body.link,
     });
     const response = await add_context.save();
     if (response) {
@@ -389,28 +386,33 @@ exports.deletProduct = async (req, res) => {
   }
 };
 
-
 ///pin by ID
 module.exports.pinArticle = async (req, res) => {
-
-  console.log("req.body",req.body)
+  console.log("req.body", req.body);
   try {
     const { articleId, pinnedById } = req.body;
 
     // Create a new pinned document for the article
     const pinnedArticle = new Pinned({
       article: articleId,
-      pinnedBy: pinnedById
+      pinnedBy: pinnedById,
     });
 
-    // Save the pinned article
     const savedPinnedArticle = await pinnedArticle.save();
+    const article = await articleSchema.findOneAndUpdate(
+      { _id: articleId },
+      { $push: { pinnedBy: pinnedById } },
+      { new: true }
+    );
 
-    res.status(200).json(savedPinnedArticle);
+    res
+      .status(200)
+      .json({ savedPinnedArticle: savedPinnedArticle, article: article });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Failed to pin the article" });
   }
-}
+};
 //Get all pinned review and article
 
 module.exports.AllPinnedData = async (req, res) => {
@@ -419,24 +421,43 @@ module.exports.AllPinnedData = async (req, res) => {
     const pinnedItems = await Pinned.find();
 
     // Extract the article IDs and review IDs from the pinned documents
-    const articleIds = pinnedItems.map(item => item.article);
-    const reviewIds = pinnedItems.map(item => item.review);
+    const articleIds = pinnedItems.map((item) => item.article);
+    const reviewIds = pinnedItems.map((item) => item.review);
 
     // Find all articles and reviews that match the extracted IDs
-    const pinnedArticles = await Article.find({ _id: { $in: articleIds } });
-    const pinnedReviews = await reviewSchema.find({ _id: { $in: reviewIds } });
+    const pinnedArticles = await Article.find({
+      _id: { $in: articleIds },
+    }).populate("belongsTo");
+    const pinnedReviews = await reviewSchema
+      .find({ _id: { $in: reviewIds } })
+      .populate("belongsTo");
 
     const pinnedData = {
       articles: pinnedArticles,
-      reviews: pinnedReviews
+      reviews: pinnedReviews,
     };
-
-    res.status(200).json(pinnedData);
+    const pinnedIte = await Pinned.find()
+    .populate([
+      {
+        path: 'review',
+        populate: {
+          path: 'belongsTo',
+          model: 'Users',
+        },
+      },
+      {
+        path: 'article',
+        populate: {
+          path: 'belongsTo',
+          model: 'Users',
+        },
+      },
+    ]);
+    res.status(200).json({pinnedData:pinnedIte});
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve pinned items" });
   }
-}
-
+};
 
 // Define a route for pinning a review
 module.exports.pinReview = async (req, res) => {
@@ -446,15 +467,57 @@ module.exports.pinReview = async (req, res) => {
     // Create a new pinned document for the review
     const pinnedReview = new Pinned({
       review: reviewId,
-      pinnedBy: pinnedById
+      pinnedBy: pinnedById,
     });
+
+    const review = await reviewSchema.findOneAndUpdate(
+      { _id: reviewId },
+      { $push: { pinnedBy: pinnedById } },
+      { new: true }
+    );
 
     // Save the pinned review
     const savedPinnedReview = await pinnedReview.save();
 
-    res.status(200).json(savedPinnedReview);
+    res
+      .status(200)
+      .json({ savedPinnedReview: savedPinnedReview, review: review });
   } catch (error) {
     res.status(500).json({ error: "Failed to pin the review" });
   }
-}
+};
 
+module.exports.RemovePinArticle = async (req, res) => {
+  try {
+    const { articleId,pinnedById, pinnedId } = req.body;
+    const result = await Pinned.findOneAndDelete({ _id: pinnedId });
+    const article = await articleSchema.findOneAndUpdate(
+      { _id: articleId },
+      { $pull: { pinnedBy: pinnedById } },
+      { new: true }
+    );
+    res
+      .status(200)
+      .json({status:true,article:article});
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to pin the article" });
+  }
+};
+module.exports.RemovePinReview = async (req, res) => {
+  try {
+    const { reviewId,pinnedById, pinnedId } = req.body;
+    const result = await Pinned.findOneAndDelete({ _id: pinnedId });
+    const review = await reviewSchema.findOneAndUpdate(
+      { _id: reviewId },
+      { $pull: { pinnedBy: pinnedById } },
+      { new: true }
+    );
+    res
+      .status(200)
+      .json({status:true,review:review});
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to pin the article" });
+  }
+};

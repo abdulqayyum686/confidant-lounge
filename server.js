@@ -9,7 +9,11 @@ const userRouterFile = require("./api/routes/users");
 const gameRouterFile = require("./api/routes/game");
 
 ///cors issuenpm start
-app.use(cors());
+app.use(cors(
+  {
+    origin:"*"
+  }
+));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 const server = http.createServer(app);
