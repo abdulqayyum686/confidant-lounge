@@ -93,7 +93,17 @@ module.exports.getAllReviewsData = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 };
-
+module.exports.getAllReviewsDataById = async (req, res) => {
+  try {
+    const reviews = await reviewSchema
+      .find({ belongsTo: req.params.id })
+      .populate("belongsTo");
+    res.status(200).json({ reviews });
+  } catch (error) {
+    console.log("Error fetching reviews", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+};
 module.exports.newreviewtype = async (req, res) => {
   console.log("addGameReview", req.body);
   const { newReviewType, belongsTo } = req.body;
@@ -186,7 +196,10 @@ exports.getAllGames = async (req, res) => {
           path: "belongsTo",
           model: "Users",
         },
-      });
+      })
+      .collation({ locale: "en", strength: 1 })
+      .sort({ name: 1 });
+
     if (data) {
       res.status(200).json({
         message: "all data send",
@@ -200,7 +213,52 @@ exports.getAllGames = async (req, res) => {
     res.status(500).json({ error: err });
   }
 };
+exports.getAllGamesFilter = async (req, res) => {
+  try {
+    const name = req.query.name; // Replace with the desired game name
+    const platform = req.query.platform; // Replace with the desired platform
+    const releaseYear = req.query.year; // Replace with the desired release year
 
+    const query = {};
+
+    if (name) {
+      query.name = { $regex: new RegExp(name, "i") };
+    }
+
+    if (platform) {
+      query.platform = { $regex: new RegExp(platform, "i") };
+    }
+
+    if (releaseYear) {
+      query.releaseYear = releaseYear;
+    }
+
+    const data = await gameSchema
+      .find(query)
+      .populate("reviewIds")
+      .populate({
+        path: "reviewIds",
+        populate: {
+          path: "belongsTo",
+          model: "Users",
+        },
+      })
+      .collation({ locale: "en", strength: 1 })
+      .sort({ name: 1 });
+
+    if (data) {
+      res.status(200).json({
+        message: "all data send",
+        data,
+      });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  } catch (err) {
+    console.log("error", err);
+    res.status(500).json({ error: err });
+  }
+};
 //article controllers
 module.exports.addPlaying = async (req, res) => {
   console.log("addPlaying", req.body);
@@ -417,7 +475,7 @@ module.exports.pinArticle = async (req, res) => {
 
 module.exports.getPinnedDataByUser = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.params;
 
     // Find all pinned documents for the specified user ID
     const pinnedItems = await Pinned.find({ pinnedBy: userId });
@@ -438,7 +496,7 @@ module.exports.getPinnedDataByUser = async (req, res) => {
       articles: pinnedArticles,
       reviews: pinnedReviews,
     };
-    const pinnedIte = await Pinned.find().populate([
+    const pinnedIte = await Pinned.find({ pinnedBy: userId }).populate([
       {
         path: "review",
         populate: {
@@ -516,5 +574,21 @@ module.exports.RemovePinReview = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to pin the article" });
+  }
+};
+exports.deletReview = async (req, res) => {
+  try {
+    let data = await gameSchema.findOneAndDelete({ _id: req.params.id });
+
+    if (data) {
+      res.status(200).json({
+        message: "This product  has been delete",
+        data,
+      });
+    } else {
+      console.log("no any product exit in data base");
+    }
+  } catch (err) {
+    console.log("error", err);
   }
 };
