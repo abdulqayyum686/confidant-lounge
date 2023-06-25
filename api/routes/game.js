@@ -42,8 +42,8 @@ function gameRouter(io) {
   );
 
   router.get("/get-Allgames-review", gameController.getAllReviewsData);
-
-  router.get("/allPinned/", gameController.getPinnedDataByUser);
+  router.get("/get-Allgames-review/:id", gameController.getAllReviewsDataById);
+  router.get("/allPinned/:userId", gameController.getPinnedDataByUser);
 
   router.post("/add-game-new-review", gameController.newreviewtype);
   router.post("/add-game-new-platform", gameController.newplateform);
@@ -57,6 +57,7 @@ function gameRouter(io) {
 
   router.get("/get-games/:id", gameController.getGamesById);
   router.get("/get-all-games", gameController.getAllGames);
+  router.get("/get-all-games-filter", gameController.getAllGamesFilter);
   router.get("/get-all-new-review", gameController.getAllnewReviews);
   router.get("/get-all-new-platform", gameController.getAllnewplatform);
 
