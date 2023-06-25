@@ -89,7 +89,8 @@ module.exports.getAllReviewsData = async (req, res) => {
     const reviews = await reviewSchema
       .find()
       .sort({ createdAt: -1 })
-      .populate("belongsTo");
+      .populate("belongsTo")
+      .exec();
     res.status(200).json({ reviews });
   } catch (error) {
     console.log("Error fetching reviews", error);
