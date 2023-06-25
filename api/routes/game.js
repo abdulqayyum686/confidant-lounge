@@ -50,11 +50,8 @@ function gameRouter(io) {
 
   router.post("/pin-review", gameController.pinReview);
   router.post("/pin-article", gameController.pinArticle);
-<<<<<<< HEAD
   router.put("/pin-review-remove", gameController.RemovePinReview);
   router.put("/pin-article-remove", gameController.RemovePinArticle);
-=======
->>>>>>> 7eb5277f0a2f8d6069529aff25cc2e40113b8644
 
   router.post("/add-game", gameController.addGame);
 

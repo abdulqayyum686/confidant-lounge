@@ -438,32 +438,27 @@ module.exports.getPinnedDataByUser = async (req, res) => {
       articles: pinnedArticles,
       reviews: pinnedReviews,
     };
-    const pinnedIte = await Pinned.find()
-    .populate([
+    const pinnedIte = await Pinned.find().populate([
       {
-        path: 'review',
+        path: "review",
         populate: {
-          path: 'belongsTo',
-          model: 'Users',
+          path: "belongsTo",
+          model: "Users",
         },
       },
       {
-        path: 'article',
+        path: "article",
         populate: {
-          path: 'belongsTo',
-          model: 'Users',
+          path: "belongsTo",
+          model: "Users",
         },
       },
     ]);
-    res.status(200).json({pinnedData:pinnedIte});
+    res.status(200).json({ pinnedData: pinnedIte });
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve pinned items" });
   }
 };
-<<<<<<< HEAD
-=======
-
->>>>>>> 7eb5277f0a2f8d6069529aff25cc2e40113b8644
 
 // Define a route for pinning a review
 module.exports.pinReview = async (req, res) => {
@@ -495,16 +490,14 @@ module.exports.pinReview = async (req, res) => {
 
 module.exports.RemovePinArticle = async (req, res) => {
   try {
-    const { articleId,pinnedById, pinnedId } = req.body;
+    const { articleId, pinnedById, pinnedId } = req.body;
     const result = await Pinned.findOneAndDelete({ _id: pinnedId });
     const article = await articleSchema.findOneAndUpdate(
       { _id: articleId },
       { $pull: { pinnedBy: pinnedById } },
       { new: true }
     );
-    res
-      .status(200)
-      .json({status:true,article:article});
+    res.status(200).json({ status: true, article: article });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to pin the article" });
@@ -512,16 +505,14 @@ module.exports.RemovePinArticle = async (req, res) => {
 };
 module.exports.RemovePinReview = async (req, res) => {
   try {
-    const { reviewId,pinnedById, pinnedId } = req.body;
+    const { reviewId, pinnedById, pinnedId } = req.body;
     const result = await Pinned.findOneAndDelete({ _id: pinnedId });
     const review = await reviewSchema.findOneAndUpdate(
       { _id: reviewId },
       { $pull: { pinnedBy: pinnedById } },
       { new: true }
     );
-    res
-      .status(200)
-      .json({status:true,review:review});
+    res.status(200).json({ status: true, review: review });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to pin the article" });
