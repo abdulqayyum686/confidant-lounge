@@ -29,6 +29,14 @@ function gameRouter(io) {
     gameController.addRecomendedContent
   );
   router.get("/get-user-playing/:id", gameController.getUserPlaying);
+  router.delete(
+    "/delete-current-playing/:id",
+    gameController.deleteUserPlaying
+  );
+  router.delete(
+    "/delete-current-recommended/:id",
+    gameController.deleteUserContext
+  );
   router.get("/get-user-context/:id", gameController.getUserContext);
   router.get(
     "/get-user-recomended-content/:id",

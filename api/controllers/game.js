@@ -86,7 +86,10 @@ module.exports.addGameReview = async (req, res) => {
 
 module.exports.getAllReviewsData = async (req, res) => {
   try {
-    const reviews = await reviewSchema.find().populate("belongsTo");
+    const reviews = await reviewSchema
+      .find()
+      .sort({ createdAt: -1 })
+      .populate("belongsTo");
     res.status(200).json({ reviews });
   } catch (error) {
     console.log("Error fetching reviews", error);
@@ -354,6 +357,42 @@ exports.getUserPlaying = async (req, res) => {
   } catch (err) {
     console.log("error", err);
     res.status(500).json({ error: err });
+  }
+};
+exports.deleteUserPlaying = async (req, res) => {
+  try {
+    const deletedDocument = await playingSchema.findByIdAndDelete(
+      req.params.id
+    );
+    if (deletedDocument) {
+      res.status(200).json({
+        message: "Document deleted successfully",
+        deletedDocument,
+      });
+    } else {
+      res.status(404).json({ error: "Document not found" });
+    }
+  } catch (err) {
+    console.log("Error deleting document:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+exports.deleteUserContext = async (req, res) => {
+  try {
+    const deletedDocument = await contextSchema.findByIdAndDelete(
+      req.params.id
+    );
+    if (deletedDocument) {
+      res.status(200).json({
+        message: "Document deleted successfully",
+        deletedDocument,
+      });
+    } else {
+      res.status(404).json({ error: "Document not found" });
+    }
+  } catch (err) {
+    console.log("Error deleting document:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 exports.getUserContext = async (req, res) => {
