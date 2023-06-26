@@ -225,7 +225,24 @@ exports.getAllUsers = async (req, res) => {
     console.log("error", err);
   }
 };
+exports.getUser = async (req, res) => {
+  try {
+    // Find the user by ID and exclude the password field
+    let user = await userSchema
+      .findOne({ _id: req.params.id })
+      .select("-password");
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "User profile updated successfully", user: user });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
 // articles controllers
 module.exports.addUserArticle = async (req, res) => {
   console.log("addUserArticle", req.body);

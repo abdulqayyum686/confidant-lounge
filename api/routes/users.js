@@ -23,6 +23,7 @@ function userRouter(io) {
   router.put("/update-bio/:id", userController.updateBio);
   router.put("/update-password/:id", userController.updatePasswordByUser);
   router.get("/get-current-user/:id", userController.getCurrentUser);
+  router.get("/get-user/:id", userController.getUser);
 
   router.post(
     "/add-user-article",
