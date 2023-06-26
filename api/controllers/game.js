@@ -101,7 +101,9 @@ module.exports.getAllReviewsDataById = async (req, res) => {
   try {
     const reviews = await reviewSchema
       .find({ belongsTo: req.params.id })
-      .populate("belongsTo");
+      .sort({ createdAt: -1 })
+      .populate("belongsTo")
+      .exec();
     res.status(200).json({ reviews });
   } catch (error) {
     console.log("Error fetching reviews", error);
@@ -147,7 +149,7 @@ module.exports.newplateform = async (req, res) => {
 };
 module.exports.getAllnewReviews = async (req, res) => {
   try {
-    const reviews = await newreviewtype.find();
+    const reviews = await newreviewtype.find().sort({ createdAt: -1 }).exec();
     res.status(200).json({ reviews });
   } catch (error) {
     console.log("Error fetching reviews", error);
@@ -157,7 +159,7 @@ module.exports.getAllnewReviews = async (req, res) => {
 
 module.exports.getAllnewplatform = async (req, res) => {
   try {
-    const reviews = await newplateform.find();
+    const reviews = await newplateform.find().sort({ createdAt: -1 }).exec();
     res.status(200).json({ reviews });
   } catch (error) {
     console.log("Error fetching reviews", error);
@@ -346,7 +348,9 @@ exports.getUserPlaying = async (req, res) => {
   try {
     let data = await playingSchema
       .find({ belongsTo: req.params.id })
-      .populate("belongsTo");
+      .sort({ createdAt: -1 })
+      .populate("belongsTo")
+      .exec();
     if (data) {
       res.status(200).json({
         message: "all data send",
@@ -400,7 +404,9 @@ exports.getUserContext = async (req, res) => {
   try {
     let data = await contextSchema
       .find({ belongsTo: req.params.id })
-      .populate("belongsTo");
+      .sort({ createdAt: -1 })
+      .populate("belongsTo")
+      .exec();
     if (data) {
       res.status(200).json({
         message: "all data send",
@@ -418,7 +424,9 @@ exports.getUserRecomendedContentById = async (req, res) => {
   try {
     let data = await recomendedContentSchema
       .find({ belongsTo: req.params.id })
-      .populate("belongsTo");
+      .sort({ createdAt: -1 })
+      .populate("belongsTo")
+      .exec();
     if (data) {
       res.status(200).json({
         message: "all data send",
@@ -536,22 +544,25 @@ module.exports.getPinnedDataByUser = async (req, res) => {
       articles: pinnedArticles,
       reviews: pinnedReviews,
     };
-    const pinnedIte = await Pinned.find({ pinnedBy: userId }).populate([
-      {
-        path: "review",
-        populate: {
-          path: "belongsTo",
-          model: "Users",
+    const pinnedIte = await Pinned.find({ pinnedBy: userId })
+      .populate([
+        {
+          path: "review",
+          populate: {
+            path: "belongsTo",
+            model: "Users",
+          },
         },
-      },
-      {
-        path: "article",
-        populate: {
-          path: "belongsTo",
-          model: "Users",
+        {
+          path: "article",
+          populate: {
+            path: "belongsTo",
+            model: "Users",
+          },
         },
-      },
-    ]);
+      ])
+      .sort({ createdAt: -1 })
+      .exec();
     res.status(200).json({ pinnedData: pinnedIte });
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve pinned items" });

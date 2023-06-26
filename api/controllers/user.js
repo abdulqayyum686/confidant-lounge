@@ -272,7 +272,11 @@ module.exports.addUserArticle = async (req, res) => {
 };
 exports.getAllUserArticle = async (req, res) => {
   try {
-    let data = await articleSchema.find().populate("belongsTo");
+    let data = await articleSchema
+      .find()
+      .sort({ createdAt: -1 })
+      .populate("belongsTo")
+      .exec();
     if (data) {
       res.status(200).json({
         message: "all data send",
