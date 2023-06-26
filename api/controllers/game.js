@@ -629,7 +629,7 @@ module.exports.RemovePinReview = async (req, res) => {
 };
 exports.deletReview = async (req, res) => {
   try {
-    let data = await gameSchema.findOneAndDelete({ _id: req.params.id });
+    let data = await GameReview.findOneAndDelete({ _id: req.params.id });
 
     if (data) {
       res.status(200).json({
@@ -639,6 +639,25 @@ exports.deletReview = async (req, res) => {
     } else {
       console.log("no any product exit in data base");
     }
+  } catch (err) {
+    console.log("error", err);
+  }
+};
+
+exports.deletGameData = async (req, res) => {
+  try {
+    let data = await gameSchema.findOneAndDelete({ _id: req.params.id });
+    const result = await reviewSchema.deleteMany({ gameId: req.params.id });
+
+    // Find and delete pinned documents associated with the deleted game reviews
+    await Pinned.deleteMany({
+      review: { $in: result.deletedCount > 0 ? result.deletedIds : [] },
+    });
+
+    res.status(200).json({
+      message: "This product  has been delete",
+      data,
+    });
   } catch (err) {
     console.log("error", err);
   }
