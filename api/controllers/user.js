@@ -56,8 +56,6 @@ module.exports.userLogin = (req, res, next) => {
     });
 };
 
-
-
 module.exports.userSignup = (req, res, next) => {
   console.log("==>>>responce sigup>>", req.body);
   const { email, password } = req.body;
@@ -118,9 +116,26 @@ exports.updateUser = async (req, res) => {
     let data = await userSchema.findOneAndUpdate(
       { _id: req.params.id },
       {
-        ...req.body,
         profileImage:
           profileImage === null ? req.body.profileImage : profileImage,
+      },
+      {
+        new: true,
+      }
+    );
+    res
+      .status(201)
+      .json({ message: "user profile update succesfully", user: data });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+exports.updateBio = async (req, res) => {
+  try {
+    let data = await userSchema.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        bio: req.body.bio,
       },
       {
         new: true,
@@ -145,7 +160,56 @@ exports.getCurrentUser = async (req, res) => {
     res.status(500).json(err);
   }
 };
+module.exports.updatePasswordByUser = async (req, res, next) => {
+  const userId = req.params.id;
+  const newPassword = req.body.newPassword;
 
+  userSchema
+    .findOne({ _id: userId })
+    .exec()
+    .then(async (foundObject) => {
+      if (foundObject) {
+        bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
+          if (err) {
+            console.log(err);
+            return res.status(500).json({ error: "Failed to hash password" });
+          }
+
+          // Update the user with the hashed password
+          userSchema
+            .findByIdAndUpdate(
+              userId,
+              { password: hashedPassword },
+              { new: true }
+            )
+            .then((updatedUser) => {
+              if (!updatedUser) {
+                return res.status(404).json({ error: "User not found" });
+              }
+              res.json({ message: "Password is updated " });
+            })
+            .catch((error) => {
+              console.log(error);
+              res.status(500).json({
+                message: "Password is not updated ",
+                error: "Failed to update password",
+              });
+            });
+        });
+      } else {
+        return res.status(404).json({
+          message: "Invalid user",
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({
+        error: err,
+        message: "something went wrong",
+      });
+    });
+};
 exports.getAllUsers = async (req, res) => {
   try {
     let data = await userSchema.find();
@@ -161,11 +225,28 @@ exports.getAllUsers = async (req, res) => {
     console.log("error", err);
   }
 };
+exports.getUser = async (req, res) => {
+  try {
+    // Find the user by ID and exclude the password field
+    let user = await userSchema
+      .findOne({ _id: req.params.id })
+      .select("-password");
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "User profile updated successfully", user: user });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
 // articles controllers
 module.exports.addUserArticle = async (req, res) => {
   console.log("addUserArticle", req.body);
-  const {  belongsTo, link } = req.body;
+  const { belongsTo, link } = req.body;
   try {
     let image = null;
 
@@ -175,7 +256,7 @@ module.exports.addUserArticle = async (req, res) => {
     const add_article = new articleSchema({
       belongsTo,
       link,
-       file: image,
+      file: image,
     });
     const response = await add_article.save();
     if (response) {
@@ -224,11 +305,9 @@ exports.getUserArticleById = async (req, res) => {
   }
 };
 
+//pin article
 
-//pin article 
-
-
-exports.pindUserArticle =  async (req, res) => {
+exports.pindUserArticle = async (req, res) => {
   try {
     const { articleId, userId } = req.body;
 
@@ -245,13 +324,11 @@ exports.pindUserArticle =  async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to add user to the pinnedBy array" });
   }
-}
+};
 
+//pin Review
 
-//pin Review 
-
-
-exports.pindUserReview =  async (req, res) => {
+exports.pindUserReview = async (req, res) => {
   try {
     const { reviewId, userId } = req.body;
 
@@ -268,4 +345,4 @@ exports.pindUserReview =  async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to add user to the pinnedBy array" });
   }
-}
+};
