@@ -23,6 +23,15 @@ const userSchema = mongoose.Schema(
     userName: {
       type: String,
     },
+    confirmEmail: {
+      type: String,
+    },
+    forgotToken: {
+      type: String,
+    },
+    isForgotTokenUsed: {
+      type: String,
+    },
   },
   {
     timestamps: true,

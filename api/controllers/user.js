@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userSchema = require("../models/user");
 const articleSchema = require("../models/article");
+const { forgotEmail } = require("../supportingMethods/sendEmail");
 const saltRounds = 10;
 
 // remove c
@@ -348,5 +349,64 @@ exports.pindUserReview = async (req, res) => {
     res.status(200).json(updatedArticle);
   } catch (error) {
     res.status(500).json({ error: "Failed to add user to the pinnedBy array" });
+  }
+};
+module.exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    let foundUser = await userSchema.findOne({ confirmEmail: email });
+    console.log(foundUser, "foundUser");
+    if (!foundUser)
+      return res
+        .status(404)
+        .json({ message: `User with email ${email} was not found!` });
+    const token = jwt.sign(
+      { access: "forgot-password", userId: foundUser._id },
+      "secret"
+    );
+    foundUser.forgotToken = token;
+    foundUser.isForgotTokenUsed = false;
+    foundUser = await foundUser.save();
+    forgotEmail(foundUser, foundUser.confirmEmail, token);
+    res.json({
+      message: "Please check your email to change the password",
+    });
+  } catch (err) {
+    console.log("POST ERRROR: ", err);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+module.exports.resetPassword = async (req, res, next) => {
+  try {
+    const { forgotToken, password, confirmPassword } = req.body;
+    if (!forgotToken || !password || !confirmPassword)
+      res
+        .status(404)
+        .json({ message: "Some fields are missing", status: false });
+    if (confirmPassword !== password)
+      return res
+        .status(400)
+        .json({ message: "Passwords do not match.", status: false });
+
+    const foundUser = await userSchema.findOne({ forgotToken });
+    if (!foundUser)
+      return res.status(400).json({
+        message: "The Password Token is Invalid or expired",
+        status: false,
+      });
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    foundUser.password = hashedPassword;
+    foundUser.isForgotTokenUsed = true;
+    foundUser.forgotToken = "";
+    const updatedUser = await foundUser.save();
+
+    res.json({
+      status: true,
+      message: "Password updated successfully!✅",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Something went wrong!", status: false });
   }
 };

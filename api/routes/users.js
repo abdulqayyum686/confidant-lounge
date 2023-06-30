@@ -15,6 +15,8 @@ function userRouter(io) {
   });
   router.post("/user-login", userController.userLogin);
   router.post("/user-signup", userController.userSignup);
+  router.put("/forgot-password", userController.forgotPassword);
+  router.put("/reset-password", userController.resetPassword);
   router.put(
     "/update-user/:id",
     upload.single("profileImage"),

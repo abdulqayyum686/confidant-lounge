@@ -630,7 +630,9 @@ module.exports.RemovePinReview = async (req, res) => {
 exports.deletReview = async (req, res) => {
   try {
     let data = await GameReview.findOneAndDelete({ _id: req.params.id });
-
+    await Pinned.findOneAndDelete({
+      review: req.params.id,
+    });
     if (data) {
       res.status(200).json({
         message: "This product  has been delete",
