@@ -62,6 +62,7 @@ function gameRouter(io) {
   router.put("/pin-article-remove", gameController.RemovePinArticle);
   router.delete("/delete-game/:id", gameController.deletGameData);
   router.delete("/delete-review/:id", gameController.deletReview);
+  router.delete("/delete-article/:id", gameController.deletArticle);
   router.post("/add-game", gameController.addGame);
 
   router.get("/get-games/:id", gameController.getGamesById);

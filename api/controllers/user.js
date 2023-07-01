@@ -37,7 +37,7 @@ module.exports.userLogin = (req, res, next) => {
                 });
               } else {
                 return res.status(401).json({
-                  message: "invalid password",
+                  message: "Invalid password",
                   action: false,
                 });
               }
