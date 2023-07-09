@@ -271,6 +271,83 @@ module.exports.addUserArticle = async (req, res) => {
     console.log("add article api error", error);
   }
 };
+
+
+exports.updateUserArticle = async (req, res) => {
+
+  const { link } = req.body;
+
+  try {
+    console.log("update-user", req.body, req.file.filename);
+    let image = null;
+
+    if (req.file.filename != undefined) {
+      file = `/img/${req.file.filename}`;
+    }
+
+    let data = await articleSchema.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        file:
+        file === null ? req.body.file : file,
+        link:
+        link === "" ? link : link,
+      },
+      {
+        new: true,
+      }
+    );
+    res
+      .status(201)
+      .json({ message: "user profile update succesfully", user: data });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+
+
+
+//update article 
+// module.exports.updateUserArticle = async (req, res) => {
+//   console.log("updateUserArticle", req.body);
+//   const { articleId,  link } = req.body;
+//   try {
+//     let image = null;
+
+//     if (req.file.filename != undefined) {
+//       image = `/img/${req.file.filename}`;
+//     }
+
+//     const updatedFields = {
+    
+//       link,
+//       file: image,
+//     };
+
+//     const updatedArticle = await articleSchema.findByIdAndUpdate(
+//       articleId,
+//       updatedFields,
+//       { new: true }
+//     );
+
+//     if (updatedArticle) {
+//       res.status(200).json({
+//         message: "Article updated successfully",
+//         article: updatedArticle,
+//       });
+//     } else {
+//       res.status(404).json({ error: "Article not found" });
+//     }
+//   } catch (error) {
+//     console.log("update article API error", error);
+//     res.status(500).json({ error: "Failed to update article" });
+//   }
+// };
+
+
+
+
 exports.getAllUserArticle = async (req, res) => {
   try {
     let data = await articleSchema

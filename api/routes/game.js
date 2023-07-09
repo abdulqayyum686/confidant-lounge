@@ -49,6 +49,11 @@ function gameRouter(io) {
     gameController.addGameReview
   );
 
+  router.put(
+    "/update-review/:id",
+    upload.single("reviewFile"),
+    gameController.updateUserReview
+  );
   router.get("/get-Allgames-review", gameController.getAllReviewsData);
   router.get("/get-Allgames-review/:id", gameController.getAllReviewsDataById);
   router.get("/allPinned/:userId", gameController.getPinnedDataByUser);

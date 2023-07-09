@@ -22,6 +22,14 @@ function userRouter(io) {
     upload.single("profileImage"),
     userController.updateUser
   );
+
+  router.put(
+    "/update-article/:id",
+    upload.single("file"),
+    userController.updateUserArticle
+  );
+
+
   router.put("/update-bio/:id", userController.updateBio);
   router.put("/update-password/:id", userController.updatePasswordByUser);
   router.get("/get-current-user/:id", userController.getCurrentUser);
@@ -32,6 +40,15 @@ function userRouter(io) {
     upload.single("pdf"),
     userController.addUserArticle
   );
+
+  // router.post(
+  //   "/update-user-article",
+  //   upload.single("pdf"),
+  //   userController.updateUserArticle
+  // );
+  
+
+
   router.post("/add-user-pindded-article", userController.pindUserArticle);
 
   router.post("/add-user-pindded-review", userController.pindUserReview);

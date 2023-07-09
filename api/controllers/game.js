@@ -6,6 +6,7 @@ const newreviewtype = require("../models/NewReviewType");
 const newplateform = require("../models/Platform");
 const Article = require("../models/article");
 const articleSchema = require("../models/article");
+const mongoose = require('mongoose');
 
 const playingSchema = require("../models/playing");
 const Pinned = require("../models/pinned");
@@ -83,6 +84,52 @@ module.exports.addGameReview = async (req, res) => {
     res.status(500).json({ error: error });
   }
 };
+
+exports.updateUserReview = async (req, res) => {
+  const { id } = req.params;
+  const { link, gameScore, reviewType } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid review ID' });
+  }
+
+  if (!reviewSchema) {
+    return res.status(500).json({ message: 'Review model not found' });
+  }
+
+  try {
+    let reviewFile = null;
+
+    if (req.file && req.file.filename) {
+      reviewFile = `/img/${req.file.filename}`;
+    }
+
+    let data = await reviewSchema.findOneAndUpdate(
+      { _id: id },
+      {
+        link: link || "",
+        gameScore: gameScore || "",
+        reviewType: reviewType || "",
+        reviewFile: reviewFile || "",
+      },
+      { new: true }
+    );
+
+    if (!data) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    res.json({ message: 'User profile updated successfully', data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+
+
 
 module.exports.getAllReviewsData = async (req, res) => {
   try {
