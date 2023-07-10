@@ -126,6 +126,41 @@ exports.updateUserReview = async (req, res) => {
   }
 };
 
+exports.updateGame = async (req, res) => {
+  const { id } = req.params;
+  const { name, platform, releaseYear } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid review ID' });
+  }
+
+  if (!gameSchema) {
+    return res.status(500).json({ message: 'Review model not found' });
+  }
+
+  try {
+
+
+    let data = await gameSchema.findOneAndUpdate(
+      { _id: id },
+      {
+        name: name || "",
+        platform: platform || "",
+        releaseYear: releaseYear || "",
+      },
+      { new: true }
+    );
+
+    if (!data) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    res.json({ message: 'User profile updated successfully', data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 
 
